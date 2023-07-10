@@ -6,6 +6,7 @@ const urlDatabase = {
   "b2xVn2" : "http://www.lighthouselabas.ca",
   "9sm5xk": "http://www.google.ca"
 };
+const templateVars = {urls: urlDatabase};
 app.set("view engine", "ejs")
 
 app.get("/",(req,res)=>{
@@ -17,7 +18,9 @@ app.get("/hello",(req,res)=>{
 app.get("/urls.json",(req,res)=>{
   res.json(urlDatabase);
 });
-
+app.get("/urls",(req,res)=>{
+  res.render("urls_index",templateVars);
+})
 app.listen(PORT, ()=>{
   console.log(`Example app listening on port ${PORT}!`)
 })
