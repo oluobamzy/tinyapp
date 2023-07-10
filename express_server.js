@@ -6,6 +6,7 @@ const urlDatabase = {
   "b2xVn2" : "http://www.lighthouselabas.ca",
   "9sm5xk": "http://www.google.ca"
 };
+app.set("view engine", "ejs")
 
 app.get("/",(req,res)=>{
   res.send("Hello!");
