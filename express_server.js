@@ -31,14 +31,15 @@ app.get("/urls",(req,res)=>{
   res.render("urls_index",templateVars);
 });
 app.get("/urls/new", (req, res) => {
+  const longURL = req.body["longURL"]
   res.render("urls_new");
 });
 app.post("/urls", (req, res) => {
   // console.log(req.body); // Log the POST request body to the console
    let newId = generateRandomStrings();
    urlDatabase[newId] = req.body["longURL"];
-   console.log(req.body);
-   console.log(urlDatabase);
+   //console.log(req.body);
+   //console.log(urlDatabase);
    res.redirect(`/urls/${newId}`);
  });
  app.get("/u/:id", (req, res) => {
@@ -55,6 +56,11 @@ app.post("/urls/:id/delete",(req,res)=>{
   delete urlDatabase[id];
   res.redirect("/urls");
 });
+app.post("/urls/:id/edit",(req,res)=>{
+  let id = req.params.id;
+  urlDatabase[id] = req.body["newUrl"];
+  res.redirect("/urls")
+})
 
 
 app.listen(PORT, ()=>{
