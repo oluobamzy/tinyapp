@@ -2,6 +2,8 @@ const express = require('express');
 const app = express();
 const PORT = 8080;
 app.use(express.urlencoded({ extended: true }));
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
 
 const generateRandomStrings = ()=>{
  
@@ -28,6 +30,10 @@ app.get("/urls.json",(req,res)=>{
   res.json(urlDatabase);
 });
 app.get("/urls",(req,res)=>{
+  const templateVars = {
+    username: req.cookies["username"],
+    urls: urlDatabase
+   }
   res.render("urls_index",templateVars);
 });
 app.get("/urls/new", (req, res) => {
@@ -62,7 +68,6 @@ app.post("/urls/:id/edit",(req,res)=>{
   res.redirect("/urls")
 });
 app.post("/login",(req,res)=>{
-  let username = req.body["userName"];
   res.cookie("username",req.body.username);
   res.redirect("/urls");
 })
