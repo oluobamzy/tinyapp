@@ -60,6 +60,11 @@ app.post("/urls/:id/edit",(req,res)=>{
   let id = req.params.id;
   urlDatabase[id] = req.body["newUrl"];
   res.redirect("/urls")
+});
+app.post("/login",(req,res)=>{
+  let username = req.body["userName"];
+  res.cookie("username",req.body.username);
+  res.redirect("/urls");
 })
 
 
