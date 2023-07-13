@@ -41,6 +41,15 @@ const users = {
     password: "a",
   },
 };
+function urlsForUserId(userId) {
+  const filteredUrls = {};
+  for (const shortURL in transformedUrlDatabase) {
+    if (transformedUrlDatabase[shortURL].userID === userId) {
+      filteredUrls[shortURL] = transformedUrlDatabase[shortURL];
+    }
+  }
+  return filteredUrls;
+}
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabas.ca",
@@ -63,14 +72,20 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 app.get("/urls", (req, res) => {
-   const userId = req.cookies["user_id"];
-   const user = users[userId];
-   const templateVars = {
+  const userId = req.cookies["user_id"];
+  const user = users[userId];
+
+  if (!userId) {
+    res.render('splashLoginPage', { user: user });
+  } else {
+    const templateVars = {
       user: user,
-    urls: transformedUrlDatabase
-   }
-  res.render("urls_index",templateVars);
+      urls: urlsForUserId(userId)
+    };
+    res.render('urls_index', templateVars);
+  }
 });
+
 app.get("/urls/new", (req, res) => {
   const userId = req.cookies["user_id"];
   const user = users[userId];
@@ -110,17 +125,47 @@ app.get("/urls/:id", (req, res) => {
   const userId = req.cookies["user_id"];
   const user = users[userId];
   const templateVars = { id: req.params.id, longURL: transformedUrlDatabase[req.params.id].longURL, user:user };
+  if(!userId){
+    res.render('splashLoginPage',{user:user})
+  }
   res.render('urls_show.ejs', templateVars);
 });
 app.post("/urls/:id/delete", (req, res) => {
-  let id = req.params.id;
+  const userId = req.cookies["user_id"];
+  const id = req.params.id;
+  const url = transformedUrlDatabase[id];
+
+  if (!url) {
+    // Handle case where URL does not exist
+    return res.status(404).send("URL not found");
+  }
+
+  if (url.userID !== userId) {
+    // Handle case where user is not authorized to delete the URL
+    return res.status(403).send("You are not authorized to delete this URL");
+  }
+
   delete transformedUrlDatabase[id];
   res.redirect("/urls");
 });
+
 app.post("/urls/:id/edit", (req, res) => {
-  let id = req.params.id;
-  transformedUrlDatabase[id].longURL = req.body["newUrl"];
-  res.redirect("/urls")
+  const userId = req.cookies["user_id"];
+  const id = req.params.id;
+  const url = transformedUrlDatabase[id];
+
+  if (!url) {
+    // Handle case where URL does not exist
+    return res.status(404).send("URL not found");
+  }
+
+  if (url.userID !== userId) {
+    // Handle case where user is not authorized to edit the URL
+    return res.status(403).send("You are not authorized to edit this URL");
+  }
+
+  url.longURL = req.body["newUrl"];
+  res.redirect("/urls");
 });
 app.get('/login',(req,res)=>{
   const userId = req.cookies["user_id"];
