@@ -19,16 +19,26 @@ const generateRandomStrings = () => {
   return result;
 
 };
+
+const emailLookUp = (email)=>{
+  for (const userId in users) {
+    if (users[userId].email === email) {
+      return true; // Email already exists
+    }
+  }
+  return false; // Email does not exist
+};
+
 const users = {
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
     password: "purple-monkey-dinosaur",
   },
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk",
+  a: {
+    id: "a",
+    email: "a@a.com",
+    password: "a",
   },
 };
 
@@ -99,15 +109,27 @@ app.post("/register",(req,res)=>{
   const email = req.body.email;
   const password = req.body.password;
   const userId = generateRandomStrings();
-  users[userId] = {
-    id: userId,
-    email,
-    password
-  }
+  //check for empty email or password
+  if (email === "" || password === ""){
+   return res.status(404).send("404 error")
+  };
+  //check if email already exists in users object
+  let isEmailExist = emailLookUp(email);
+  if(isEmailExist){
+    return res.status(404).send("404 error");
+  };
 
- res.cookie("user_id",userId);
+  //Add new user to the users object
+    users[userId] = {
+      id: userId,
+      email,
+      password
+    };
 
-  res.redirect("/urls");  
+  //set user_id cookie 
+   res.cookie("user_id",userId);
+   //redirect
+    res.redirect("/urls");  
 })
 
 
