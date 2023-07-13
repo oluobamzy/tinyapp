@@ -46,6 +46,17 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabas.ca",
   "9sm5xk": "http://www.google.ca"
 };
+//change the urldatabase to transformed database
+const transformedUrlDatabase = {};
+
+for (const url_id in urlDatabase) {
+  transformedUrlDatabase[url_id] = {
+    longURL: urlDatabase[url_id],
+    userID: ""
+  };
+};
+
+
 //const templateVars = { urls: urlDatabase };
 app.set("view engine", "ejs");
 app.get("/urls.json", (req, res) => {
@@ -56,7 +67,7 @@ app.get("/urls", (req, res) => {
    const user = users[userId];
    const templateVars = {
       user: user,
-    urls: urlDatabase
+    urls: transformedUrlDatabase
    }
   res.render("urls_index",templateVars);
 });
@@ -72,22 +83,24 @@ app.get("/urls/new", (req, res) => {
   
 });
 app.post("/urls", (req, res) => {
-  // console.log(req.body); // Log the POST request body to the console
   let newId = generateRandomStrings();
-  urlDatabase[newId] = req.body["longURL"];
+  transformedUrlDatabase[newId] = {
+    longURL: req.body["longURL"],
+    userID: req.cookies["user_id"]
+  };
   const userId = req.cookies["user_id"];
-  const user = users[userId];
-  if(!userId){
-   return res.send('<p>You can not post because you are not logged in</p>')
-  }else{
+
+  if (!userId) {
+    return res.send("You cannot post because you are not logged in");
+  } else {
     res.redirect(`/urls/${newId}`);
   }
 });
 app.get("/u/:id", (req, res) => {
   // const longURL = ...
-  const longURL = urlDatabase[req.params.id]
-  for(let shortUrl in urlDatabase){
-    if(!urlDatabase[req.params.id]){
+  const longURL = transformedUrlDatabase[req.params.id].longURL
+  for(let shortUrl in transformedUrlDatabase){
+    if(shortUrl !== req.params.id){
       return res.status(404).send("Not found");
     }
   }
@@ -96,17 +109,17 @@ app.get("/u/:id", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   const userId = req.cookies["user_id"];
   const user = users[userId];
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id],user:user};
+  const templateVars = { id: req.params.id, longURL: transformedUrlDatabase[req.params.id].longURL, user:user };
   res.render('urls_show.ejs', templateVars);
 });
 app.post("/urls/:id/delete", (req, res) => {
   let id = req.params.id;
-  delete urlDatabase[id];
+  delete transformedUrlDatabase[id];
   res.redirect("/urls");
 });
 app.post("/urls/:id/edit", (req, res) => {
   let id = req.params.id;
-  urlDatabase[id] = req.body["newUrl"];
+  transformedUrlDatabase[id].longURL = req.body["newUrl"];
   res.redirect("/urls")
 });
 app.get('/login',(req,res)=>{
