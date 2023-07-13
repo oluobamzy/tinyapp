@@ -52,13 +52,13 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 app.get("/urls", (req, res) => {
-  const userId = req.cookies["user_id"];
-  const user = users[userId];
-  const templateVars = {
-    user: user,
+   const userId = req.cookies["user_id"];
+   const user = users[userId];
+   const templateVars = {
+    //   user: user,
     urls: urlDatabase
-  }
-  res.render("urls_index", templateVars);
+   }
+  res.render("urls_index",templateVars);
 });
 app.get("/urls/new", (req, res) => {
   const userId = req.cookies["user_id"];
@@ -93,9 +93,20 @@ app.post("/urls/:id/edit", (req, res) => {
   urlDatabase[id] = req.body["newUrl"];
   res.redirect("/urls")
 });
+app.get('/login',(req,res)=>{
+  res.render('urls_login')
+})
 app.post("/login", (req, res) => {
-  res.cookie("user_id", req.body.id);
-  res.redirect("/urls");
+  const email = req.body.email;
+  const password = req.body.password;
+  let isEmailExist = emailLookUp(email);
+  for(let userId in users){
+    if(!isEmailExist && users[userId].password !== password){
+       return res.status(403).send("403 error");
+    }
+    res.cookie("user_id", users[userId].id);
+  };
+   res.redirect("/urls");
 });
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
