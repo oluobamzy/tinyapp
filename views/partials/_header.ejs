@@ -20,9 +20,9 @@
       </div>
     </div>
     <div>
-      <% if (username) { %>
+      <% if (user.id) { %>
         <!-- Display username and logout form -->
-        <span>Welcome, <%= username %></span>
+        <span>Welcome, <%= user.email %></span>
         <form method="post" action="/logout">
           <button type="submit" class="btn btn-secondary">Log Out</button>
         </form>

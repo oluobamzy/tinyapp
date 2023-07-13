@@ -36,20 +36,24 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabas.ca",
   "9sm5xk": "http://www.google.ca"
 };
-const templateVars = { urls: urlDatabase };
+//const templateVars = { urls: urlDatabase };
 app.set("view engine", "ejs");
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 app.get("/urls", (req, res) => {
+  const userId = req.cookies["user_id"];
+  const user = users[userId];
   const templateVars = {
-    username: req.cookies["username"],
+    user: user,
     urls: urlDatabase
   }
   res.render("urls_index", templateVars);
 });
 app.get("/urls/new", (req, res) => {
-  const longURL = req.body["longURL"]
+  const userId = req.cookies["user_id"];
+  const user = users[userId];
+  const longURL = req.body["longURL"];
   res.render("urls_new");
 });
 app.post("/urls", (req, res) => {
@@ -80,37 +84,30 @@ app.post("/urls/:id/edit", (req, res) => {
   res.redirect("/urls")
 });
 app.post("/login", (req, res) => {
-  res.cookie("username", req.body.username);
+  res.cookie("user_id", req.body.id);
   res.redirect("/urls");
 });
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect("/urls")
 });
 app.get('/register',(req,res)=>{
+
   res.render('urls_register');
 });
 app.post("/register",(req,res)=>{
-  let emailbody = req.body.email;
-  let passwordbody = req.body.password
-  const addUser = (obj)=>{
-    let id = generateRandomStrings();
-   let email = emailbody;
-   let password = passwordbody;
-    const newUser = {
-      id:id,
-      email:email,
-      password:password
-    };
-   return users[id] = newUser;
+  const email = req.body.email;
+  const password = req.body.password;
+  const userId = generateRandomStrings();
+  users[userId] = {
+    id: userId,
+    email,
+    password
   }
- const templateVars = addUser(users);
- res.cookie("id",templateVars.id);
 
-  res.redirect("/urls");
-  console.log(templateVars);
-  console.log(users);
-  
+ res.cookie("user_id",userId);
+
+  res.redirect("/urls");  
 })
 
 
