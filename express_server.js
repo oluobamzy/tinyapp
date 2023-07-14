@@ -53,7 +53,7 @@ const users = {
     password: "a",
   },
 };
-function urlsForUserId(userId) {//getting urls that are in the datatbase
+const urlsForUserId = (userId)=> {//getting urls that are in the datatbase
   const filteredUrls = {};
   for (const shortURL in transformedUrlDatabase) {
     if (transformedUrlDatabase[shortURL].userID === userId) {
@@ -61,7 +61,7 @@ function urlsForUserId(userId) {//getting urls that are in the datatbase
     }
   }
   return filteredUrls;
-}
+};
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabas.ca",
@@ -75,7 +75,7 @@ for (const url_id in urlDatabase) {
     longURL: urlDatabase[url_id],
     userID: ""
   };
-};
+}
 
 
 //const templateVars = { urls: urlDatabase };
@@ -101,10 +101,9 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   const userId = req.session.user_id;
   const user = users[userId];
-  const longURL = req.body["longURL"];
-  if(!userId){
-    res.redirect('/login')
-  }else{
+  if (!userId) {
+    res.redirect('/login');
+  } else {
     res.render("urls_new",{user: user});
   }
   
@@ -194,12 +193,12 @@ app.get('/login',(req,res)=>{
   const userId = req.session.user_id;
   const user = users[userId];
   const templateVars = { user:user };
-    if (userId) {
-      res.redirect("/urls");
-    } else {
-      res.render('urls_login',templateVars)
-    }
-})
+  if (userId) {
+    res.redirect("/urls");
+  } else {
+    res.render('urls_login',templateVars);
+  }
+});
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -216,7 +215,7 @@ app.post("/login", (req, res) => {
 app.post("/logout", (req, res) => {
   req.session = null;
   res.clearCookie("session");
-  res.redirect("/login")
+  res.redirect("/login");
 });
 app.get('/register',(req,res)=>{
   const userId = req.session.user_id;
@@ -235,29 +234,29 @@ app.post("/register",(req,res)=>{
   const hashedPassword = bcrypt.hashSync(password,10);
   const userId = generateRandomStrings();
   //check for empty email or password
-  if (email === "" || password === ""){
-   return res.status(404).send("404 error")
-  };
+  if (email === "" || password === "") {
+    return res.status(404).send("404 error");
+  }
   //check if email already exists in users object
   let isEmailExist = emailLookUp(email,users);
-  if(isEmailExist){
+  if (isEmailExist) {
     return res.status(404).send("404 error");
-  };
+  }
 
   //Add new user to the users object
-    users[userId] = {
-      id: userId,
-      email,
-      hashedPassword
-    };
+  users[userId] = {
+    id: userId,
+    email,
+    hashedPassword
+  };
 
-  //set user_id cookie 
-  req.session.user_id = userId
-   //redirect
-    res.redirect("/urls");  
-})
+  //set user_id cookie
+  req.session.user_id = userId;
+  //redirect
+  res.redirect("/urls");
+});
 
 
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`)
+  console.log(`Example app listening on port ${PORT}!`);
 });
