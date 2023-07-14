@@ -1,6 +1,6 @@
 const { assert } = require('chai');
 
-const { emailLookUp } = require('../helpers.js');
+const { getUserByEmail } = require('../helpers.js');
 
 const testUsers = {
   "userRandomID": {
@@ -15,16 +15,16 @@ const testUsers = {
   }
 };
 
-describe('emailLookUp', function() {
-  it('should return true if a user exist', function() {
-    const user = emailLookUp("user@example.com", testUsers)
-    const expected = true;
+describe('getUsersByEmail', function() {
+  it('should return userRandomID if a user exist', function() {
+    const user = getUserByEmail(testUsers,"user@example.com").id;
+    const expected = "userRandomID";
     // Write your assert statement here
     assert.strictEqual(user,expected);
   });
-  it('should return false if a user does not exist', function() {
-    const user = emailLookUp("userrr@example.com", testUsers)
-    const expected = false;
+  it('should return null if a user does not exist', function() {
+    const user = getUserByEmail(testUsers,"userrr@example.com")
+    const expected = null;
     // Write your assert statement here
     assert.strictEqual(user,expected);
   });
