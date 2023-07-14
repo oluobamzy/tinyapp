@@ -6,17 +6,20 @@ const getUserByEmail = (obj, email)=> {
   }
   return null;
 };
-const testUsers = {
-  "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
-  },
-  "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
-    password: "dishwasher-funk"
+
+const generateRandomStrings = () => {//randomly generating userid for url database
+
+  let result = '';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const charactersLength = 6;
+
+  for (let i = 0; i < charactersLength; i++) {
+    const randomIndex = Math.floor(Math.random() * charactersLength);
+    result += characters.charAt(randomIndex);
   }
+
+  return result;
+
 };
-console.log(getUserByEmail(testUsers,"user@example.com"));
-module.exports = {getUserByEmail};
+
+module.exports = {getUserByEmail,generateRandomStrings};
