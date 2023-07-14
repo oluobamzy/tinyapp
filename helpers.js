@@ -1,9 +1,9 @@
-const emailLookUp = (email,users)=>{
-  for (const userId in users) {
-    if (users[userId].email === email) {
-      return true; // Email already exists
+const getUserByEmail = (obj, email)=> {
+  for (let userId in obj) {
+    if (obj[userId].email === email) {
+      return obj[userId];
     }
   }
-  return false; // Email does not exist
+  return null;
 };
-module.exports = {emailLookUp};
+module.exports = {getUserByEmail};

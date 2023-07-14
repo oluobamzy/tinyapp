@@ -1,7 +1,7 @@
 const cookieSession = require('cookie-session');
 const express = require('express');
 const crypto = require('crypto');// i tried using math.round to generate my own key but i kept getting errors...found this via google search.
-const {emailLookUp} = require('./helpers');//importing my helper function
+const {getUserByEmail} = require('./helpers');//importing my helper function
 
 const app = express();
 const PORT = 8080;
@@ -189,27 +189,32 @@ app.post("/urls/:id/edit", (req, res) => {
   url.longURL = req.body["newUrl"];
   res.redirect("/urls");
 });
-app.get('/login',(req,res)=>{
+app.get('/login', (req, res) => {
   const userId = req.session.user_id;
   const user = users[userId];
-  const templateVars = { user:user };
-  if (userId) {
+  if (user) {
     res.redirect("/urls");
   } else {
-    res.render('urls_login',templateVars);
+    const templateVars = { user };
+    res.render('urls_login', templateVars);
   }
 });
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  let isEmailExist = emailLookUp(email,users);
+  const user = getUserByEmail(email, users);
 
-  for (let userId in users) {
-    if (!isEmailExist && bcrypt.compareSync(password, users[userId].hashedPassword)) {
-      return res.status(403).send("403 error");
-    }
-    req.session.user_id = users[userId].id;
+  if (!user) {
+    // Handle case where the user with the provided email does not exist
+    return res.render('unsuccesful_login',{user:user});
   }
+
+  if (!bcrypt.compareSync(password, user.hashedPassword)) {
+    // Handle case where the provided password is incorrect
+    return res.status(403).send("Invalid email or password");
+  }
+
+  req.session.user_id = user.id;
   res.redirect("/urls");
 });
 app.post("/logout", (req, res) => {
@@ -238,8 +243,8 @@ app.post("/register",(req,res)=>{
     return res.status(404).send("404 error");
   }
   //check if email already exists in users object
-  let isEmailExist = emailLookUp(email,users);
-  if (isEmailExist) {
+  let user = getUserByEmail(email,users);
+  if (user) {
     return res.status(404).send("404 error");
   }
 
