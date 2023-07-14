@@ -1,7 +1,7 @@
 const cookieSession = require('cookie-session');
 const express = require('express');
-const crypto = require('crypto');
-const {emailLookUp} = require('./helpers');
+const crypto = require('crypto');// i tried using math.round to generate my own key but i kept getting errors...found this via google search.
+const {emailLookUp} = require('./helpers');//importing my helper function
 
 const app = express();
 const PORT = 8080;
@@ -12,7 +12,7 @@ app.use(cookieParser());
 
 const bcrypt = require('bcryptjs');
 
-const generateKeys = () => {
+const generateKeys = () => {//generating the cookie-session key
   const randomBytes = crypto.randomBytes(32);
   return [randomBytes.toString('hex')];
 };
@@ -26,7 +26,7 @@ app.use(
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
   })
 );
-const generateRandomStrings = () => {
+const generateRandomStrings = () => {//randomly generating userid for url database
 
   let result = '';
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -53,7 +53,7 @@ const users = {
     password: "a",
   },
 };
-function urlsForUserId(userId) {
+function urlsForUserId(userId) {//getting urls that are in the datatbase
   const filteredUrls = {};
   for (const shortURL in transformedUrlDatabase) {
     if (transformedUrlDatabase[shortURL].userID === userId) {
@@ -111,11 +111,11 @@ app.get("/urls/new", (req, res) => {
 });
 app.post("/urls", (req, res) => {
   let newId = generateRandomStrings();
+  const userId = req.session.user_id;
   transformedUrlDatabase[newId] = {
     longURL: req.body["longURL"],
     userID: req.session.user_id
   };
-  const userId = req.session.user_id;
 
   if (!userId) {
     return res.send("You cannot post because you are not logged in");
@@ -124,23 +124,34 @@ app.post("/urls", (req, res) => {
   }
 });
 app.get("/u/:id", (req, res) => {
-  // const longURL = ...
-  const longURL = transformedUrlDatabase[req.params.id].longURL
-  for(let shortUrl in transformedUrlDatabase){
-    if(shortUrl !== req.params.id){
-      return res.status(404).send("Not found");
-    }
+  const shortURL = req.params.id;
+  const urlEntry = transformedUrlDatabase[shortURL];
+
+  if (urlEntry) {
+    const longURL = urlEntry.longURL;
+    res.redirect(longURL);
+  } else {
+    res.status(404).send("The URL does not exist. Please provide a valid URL.");
   }
-  res.redirect(longURL);
 });
+
 app.get("/urls/:id", (req, res) => {
   const userId = req.session.user_id;
   const user = users[userId];
-  const templateVars = { id: req.params.id, longURL: transformedUrlDatabase[req.params.id].longURL, user:user };
-  if(!userId){
-    res.render('splashLoginPage',{user:user})
+  const urlEntry = transformedUrlDatabase[req.params.id];
+
+  if (!userId) {
+    res.render('splashLoginPage', { user: user });
+  } else if (!urlEntry) {
+    res.status(404).send("Not found");
+  } else {
+    const templateVars = {
+      id: req.params.id,
+      longURL: urlEntry.longURL,
+      user: user
+    };
+    res.render('urls_show.ejs', templateVars);
   }
-  res.render('urls_show.ejs', templateVars);
 });
 app.post("/urls/:id/delete", (req, res) => {
   const userId = req.session.user_id;
@@ -244,7 +255,6 @@ app.post("/register",(req,res)=>{
   req.session.user_id = userId
    //redirect
     res.redirect("/urls");  
-    console.log(users)
 })
 
 
