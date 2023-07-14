@@ -1,3 +1,4 @@
+const {transformedUrlDatabase} = require('./database');
 const getUserByEmail = (obj, email)=> {
   for (let userId in obj) {
     if (obj[userId].email === email) {
@@ -22,4 +23,13 @@ const generateRandomStrings = () => {//randomly generating userid for url databa
 
 };
 
-module.exports = {getUserByEmail,generateRandomStrings};
+const urlsForUserId = (userId)=> {//getting urls that are in the datatbase
+  const filteredUrls = {};
+  for (const shortURL in transformedUrlDatabase) {
+    if (transformedUrlDatabase[shortURL].userID === userId) {
+      filteredUrls[shortURL] = transformedUrlDatabase[shortURL];
+    }
+  }
+  return filteredUrls;
+};
+module.exports = {getUserByEmail,generateRandomStrings,urlsForUserId};

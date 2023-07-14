@@ -1,7 +1,8 @@
 const cookieSession = require('cookie-session');
 const express = require('express');
 const crypto = require('crypto');// i tried using math.round to generate my own key but i kept getting errors...found this via google search.
-const {getUserByEmail,generateRandomStrings} = require('./helpers');//importing my helper function
+const {getUserByEmail,generateRandomStrings, urlsForUserId} = require('./helpers');//importing my helper function
+const {users, urlDatabase, transformedUrlDatabase} = require('./database');
 
 const app = express();
 const PORT = 8080;
@@ -23,42 +24,6 @@ app.use(
   })
 );
 
-const users = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur",
-  },
-  a: {
-    id: "a",
-    email: "a@a.com",
-    password: "a",
-  },
-};
-
-
-const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabas.ca",
-  "9sm5xk": "http://www.google.ca"
-};
-//change the urldatabase to transformed database
-const transformedUrlDatabase = {};
-
-for (const url_id in urlDatabase) {
-  transformedUrlDatabase[url_id] = {
-    longURL: urlDatabase[url_id],
-    userID: ""
-  };
-}
-const urlsForUserId = (userId)=> {//getting urls that are in the datatbase
-  const filteredUrls = {};
-  for (const shortURL in transformedUrlDatabase) {
-    if (transformedUrlDatabase[shortURL].userID === userId) {
-      filteredUrls[shortURL] = transformedUrlDatabase[shortURL];
-    }
-  }
-  return filteredUrls;
-};
 
 //ROUTES
 app.set("view engine", "ejs");
@@ -180,7 +145,7 @@ app.get('/login', (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const user = getUserByEmail(email, users);
+  const user = getUserByEmail(users,email);
   if (!user) {
     // Handle case where the user with the provided email does not exist
     return res.render('unsuccesful_login',{user:user});
