@@ -31,7 +31,15 @@ app.set("view engine", "ejs");
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
-
+app.get('/',(req,res)=>{
+  const userId = req.session.user_id;
+  const user = users[userId];
+  if (!userId) {
+    res.redirect('/login');
+  } else {
+    res.redirect('/urls');
+  }
+})
 app.get("/urls", (req, res) => {
   const userId = req.session.user_id;
   const user = users[userId];
